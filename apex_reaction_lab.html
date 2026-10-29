@@ -1,0 +1,802 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#08090d">
+  <title>APEX — Reaction Lab</title>
+
+  <!-- APEX Thunderbolt Favicon -->
+  <link rel="icon" type="image/svg+xml"
+    href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='12' fill='%2308090d'/%3E%3Cpath d='M9 8h46L39 27h13L19 57l7-22H9z' fill='%23ff3048'/%3E%3C/svg%3E">
+
+  <style>
+    :root {
+      --bg: #08090d;
+      --panel: #11131b;
+      --line: #272a36;
+      --muted: #8e93a5;
+      --white: #f5f6fb;
+      --red: #ff3048;
+      --green: #40f5a5;
+      --yellow: #ffd166;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      margin: 0;
+      background: radial-gradient(ellipse at 50% -15%, #242637 0, transparent 45%), var(--bg);
+      color: var(--white);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    body:before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      opacity: .13;
+      background-image:
+        linear-gradient(#ffffff08 1px, transparent 1px),
+        linear-gradient(90deg, #ffffff08 1px, transparent 1px);
+      background-size: 44px 44px;
+      mask-image: linear-gradient(to bottom, black, transparent 85%);
+    }
+
+    .wrap {
+      width: min(1100px, 92vw);
+      margin: auto;
+      position: relative;
+    }
+
+    .topbar {
+      height: 82px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid #ffffff12;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 11px;
+      font-weight: 900;
+      letter-spacing: .15em;
+      font-size: 1.1rem;
+    }
+
+    .brand-mark {
+      width: 32px;
+      height: 26px;
+      background: var(--red);
+      clip-path: polygon(0 0, 100% 0, 68% 35%, 100% 35%, 36% 100%, 48% 57%, 0 57%);
+    }
+
+    .brand span {
+      color: var(--red);
+    }
+
+    .status {
+      font-size: .72rem;
+      letter-spacing: .15em;
+      color: var(--muted);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: var(--green);
+      box-shadow: 0 0 12px #40f5a5;
+    }
+
+    .hero {
+      text-align: center;
+      padding: 54px 0 22px;
+    }
+
+    .eyebrow {
+      font-size: .72rem;
+      font-weight: 800;
+      letter-spacing: .28em;
+      color: var(--red);
+      text-transform: uppercase;
+    }
+
+    .hero h1 {
+      font-size: clamp(2.4rem, 6vw, 5rem);
+      line-height: .98;
+      letter-spacing: -.065em;
+      margin: 15px 0;
+      font-weight: 950;
+    }
+
+    .hero h1 em {
+      font-style: normal;
+      color: transparent;
+      -webkit-text-stroke: 1.5px #f5f6fb;
+    }
+
+    .hero p {
+      margin: 0 auto;
+      color: var(--muted);
+      max-width: 530px;
+      line-height: 1.7;
+      font-size: .96rem;
+    }
+
+    .game {
+      background: linear-gradient(145deg, #171923, #0e1017 65%);
+      border: 1px solid #ffffff17;
+      border-radius: 24px;
+      padding: clamp(18px, 4vw, 36px);
+      box-shadow: 0 28px 100px #0008;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .game:before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 12%;
+      right: 12%;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, var(--red), transparent);
+      opacity: .7;
+    }
+
+    .game-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 28px;
+    }
+
+    .label {
+      color: var(--muted);
+      font-size: .68rem;
+      letter-spacing: .18em;
+      text-transform: uppercase;
+      font-weight: 800;
+    }
+
+    .round {
+      border: 1px solid #ffffff18;
+      border-radius: 999px;
+      padding: 8px 12px;
+      color: #c4c7d4;
+      font-size: .72rem;
+      letter-spacing: .08em;
+    }
+
+    .starting-lights {
+      display: flex;
+      justify-content: center;
+      gap: clamp(8px, 2.5vw, 18px);
+      padding: 24px 10px 29px;
+    }
+
+    .light-pod {
+      width: clamp(48px, 9vw, 78px);
+      aspect-ratio: 1 / 1.13;
+      border-radius: 15px;
+      background: #090a0f;
+      border: 1px solid #343744;
+      padding: 8px;
+      box-shadow: inset 0 0 18px #000c, 0 7px 18px #0005;
+      transition: transform .2s;
+    }
+
+    .bulb {
+      height: 100%;
+      border-radius: 50%;
+      background: radial-gradient(circle at 35% 28%, #3d2027, #240d13 48%, #15080c);
+      border: 1px solid #52202a;
+      box-shadow: inset 0 0 12px #000;
+      transition: all .12s;
+    }
+
+    .light-pod.on .bulb {
+      background: radial-gradient(circle at 35% 25%, #ffb0b7, #ff3048 35%, #c50020 75%);
+      border-color: #ff7887;
+      box-shadow: 0 0 13px #ff3048, 0 0 30px #ff304888, inset 0 0 8px #ffe2e5;
+    }
+
+    .light-pod.go .bulb {
+      background: radial-gradient(circle at 35% 25%, #d9fff0, #40f5a5 35%, #08a76b 75%);
+      border-color: #9affd1;
+      box-shadow: 0 0 13px #40f5a5, 0 0 30px #40f5a588;
+    }
+
+    .prompt {
+      min-height: 58px;
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 7px;
+    }
+
+    .prompt strong {
+      font-size: clamp(1rem, 2.8vw, 1.3rem);
+      letter-spacing: .04em;
+    }
+
+    .prompt span {
+      font-size: .78rem;
+      color: var(--muted);
+    }
+
+    .timer {
+      text-align: center;
+      font-size: clamp(2.5rem, 8vw, 5.6rem);
+      font-variant-numeric: tabular-nums;
+      font-weight: 900;
+      letter-spacing: -.065em;
+      margin: 14px 0 22px;
+      line-height: 1;
+    }
+
+    .timer small {
+      font-size: .28em;
+      color: var(--muted);
+      letter-spacing: .1em;
+      margin-left: 8px;
+    }
+
+    .actions {
+      display: flex;
+      justify-content: center;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .btn {
+      border: 0;
+      border-radius: 12px;
+      padding: 16px 25px;
+      font: 800 .8rem inherit;
+      letter-spacing: .13em;
+      text-transform: uppercase;
+      cursor: pointer;
+      transition: transform .15s, filter .15s;
+    }
+
+    .btn:hover {
+      filter: brightness(1.08);
+      transform: translateY(-2px);
+    }
+
+    .btn:active {
+      transform: translateY(0);
+    }
+
+    .btn-primary {
+      background: var(--red);
+      color: white;
+      box-shadow: 0 8px 25px #ff304833;
+    }
+
+    .btn-secondary {
+      background: #ffffff08;
+      color: #d5d7e1;
+      border: 1px solid #ffffff1b;
+    }
+
+    .keycap {
+      display: inline-grid;
+      place-items: center;
+      border: 1px solid #ffffff38;
+      border-radius: 5px;
+      padding: 3px 7px;
+      margin-left: 8px;
+      font-size: .7rem;
+      background: #0003;
+    }
+
+    .note {
+      text-align: center;
+      color: #72788b;
+      font-size: .73rem;
+      margin: 18px 0 0;
+      line-height: 1.6;
+    }
+
+    .below {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      margin: 18px 0 60px;
+    }
+
+    .stat-card,
+    .history-card {
+      background: #10121a;
+      border: 1px solid #ffffff12;
+      border-radius: 18px;
+      padding: 22px;
+    }
+
+    .section-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 18px;
+    }
+
+    .section-head h2 {
+      font-size: .85rem;
+      letter-spacing: .13em;
+      text-transform: uppercase;
+      margin: 0;
+    }
+
+    .best {
+      font-size: .7rem;
+      color: var(--green);
+      letter-spacing: .1em;
+    }
+
+    .big-stat {
+      font-size: 2.2rem;
+      font-weight: 900;
+      letter-spacing: -.05em;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .big-stat span {
+      font-size: .8rem;
+      color: var(--muted);
+      font-weight: 600;
+      letter-spacing: 0;
+    }
+
+    .stat-sub {
+      font-size: .76rem;
+      color: var(--muted);
+      margin-top: 6px;
+    }
+
+    .history-list {
+      display: flex;
+      flex-direction: column;
+      gap: 9px;
+    }
+
+    .history-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 10px 12px;
+      background: #ffffff05;
+      border-radius: 9px;
+      font-size: .8rem;
+    }
+
+    .history-row span:first-child {
+      color: #aeb3c4;
+    }
+
+    .history-row strong {
+      font-variant-numeric: tabular-nums;
+    }
+
+    .empty {
+      color: #777d90;
+      font-size: .8rem;
+      padding: 10px 0;
+    }
+
+    .footer {
+      display: flex;
+      justify-content: space-between;
+      gap: 16px;
+      flex-wrap: wrap;
+      border-top: 1px solid #ffffff12;
+      padding: 20px 0 28px;
+      color: #6f7485;
+      font-size: .7rem;
+      letter-spacing: .05em;
+    }
+
+    .footer b {
+      color: #a9adbb;
+    }
+
+    .flash {
+      animation: flash .4s ease;
+    }
+
+    @keyframes flash {
+      0% {
+        transform: scale(1);
+        filter: brightness(1);
+      }
+
+      40% {
+        transform: scale(1.02);
+        filter: brightness(1.6);
+      }
+
+      100% {
+        transform: scale(1);
+        filter: brightness(1);
+      }
+    }
+
+    @media (max-width: 680px) {
+      .topbar {
+        height: 68px;
+      }
+
+      .hero {
+        padding-top: 40px;
+      }
+
+      .below {
+        grid-template-columns: 1fr;
+      }
+
+      .game {
+        border-radius: 18px;
+      }
+
+      .light-pod {
+        border-radius: 10px;
+        padding: 5px;
+      }
+
+      .game-head {
+        margin-bottom: 14px;
+      }
+
+      .starting-lights {
+        padding-top: 18px;
+        padding-bottom: 22px;
+      }
+
+      .footer {
+        justify-content: center;
+        text-align: center;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <header class="wrap topbar">
+    <div class="brand">
+      <div class="brand-mark"></div>
+      APEX<span> / LAB</span>
+    </div>
+    <div class="status">
+      <i class="dot"></i>
+      REACTION SYSTEM ONLINE
+    </div>
+  </header>
+
+  <main class="wrap">
+    <section class="hero">
+      <div class="eyebrow">Lights out. Launch.</div>
+      <h1>WHAT'S YOUR <em>REACTION?</em></h1>
+      <p>Five lights. One moment. Hit space the instant they go out and find out how fast you really are.</p>
+    </section>
+
+    <section class="game" aria-label="Reaction time test">
+      <div class="game-head">
+        <span class="label">Race start simulation</span>
+        <span class="round" id="roundLabel">ATTEMPT 01</span>
+      </div>
+
+      <div class="starting-lights" id="lights" aria-label="Five red start lights">
+        <div class="light-pod">
+          <div class="bulb"></div>
+        </div>
+        <div class="light-pod">
+          <div class="bulb"></div>
+        </div>
+        <div class="light-pod">
+          <div class="bulb"></div>
+        </div>
+        <div class="light-pod">
+          <div class="bulb"></div>
+        </div>
+        <div class="light-pod">
+          <div class="bulb"></div>
+        </div>
+      </div>
+
+      <div class="prompt">
+        <strong id="message">READY TO TAKE THE GRID?</strong>
+        <span id="subMessage">Press start, wait for lights out, then react.</span>
+      </div>
+
+      <div class="timer" id="timer">—.———<small>MS</small></div>
+
+      <div class="actions">
+        <button class="btn btn-primary" id="startBtn">Start sequence <span class="keycap">↵</span></button>
+        <button class="btn btn-secondary" id="resetBtn">Reset</button>
+      </div>
+
+      <p class="note">Use <b>SPACE</b> when all lights go out. Jumping the start counts as a false start.</p>
+    </section>
+
+    <section class="below">
+      <div class="stat-card">
+        <div class="section-head">
+          <h2>Your personal best</h2>
+          <span class="best">● LIVE TRACKING</span>
+        </div>
+        <div class="big-stat" id="bestValue">— <span>ms</span></div>
+        <div class="stat-sub" id="bestSub">Complete a run to set your benchmark.</div>
+      </div>
+
+      <div class="history-card">
+        <div class="section-head">
+          <h2>Recent attempts</h2>
+          <span class="label" id="countLabel">0 RUNS</span>
+        </div>
+        <div class="history-list" id="history">
+          <div class="empty">Your laps will appear here.</div>
+        </div>
+      </div>
+    </section>
+
+    <footer class="footer">
+      <span>APEX REACTION LAB <b>·</b> BUILT FOR THE GRID</span>
+      <span>Timing uses your browser's high-resolution clock.</span>
+    </footer>
+  </main>
+
+  <script>
+    (() => {
+      const pods = [...document.querySelectorAll('.light-pod')];
+      const message = document.getElementById('message');
+      const subMessage = document.getElementById('subMessage');
+      const timer = document.getElementById('timer');
+      const startBtn = document.getElementById('startBtn');
+      const resetBtn = document.getElementById('resetBtn');
+      const roundLabel = document.getElementById('roundLabel');
+      const bestValue = document.getElementById('bestValue');
+      const bestSub = document.getElementById('bestSub');
+      const historyEl = document.getElementById('history');
+      const countLabel = document.getElementById('countLabel');
+
+      let state = 'idle';
+      let startAt = 0;
+      let goTimeout = null;
+      let lightTimers = [];
+      let attempt = 1;
+      let results = [];
+
+      // High-resolution browser clock; actual precision depends on browser and hardware.
+      function showTime(ms) {
+        return `${ms.toFixed(3)}<small>MS</small>`;
+      }
+
+      function setMessage(main, sub) {
+        message.textContent = main;
+        subMessage.textContent = sub;
+      }
+
+      function clearTimers() {
+        clearTimeout(goTimeout);
+        lightTimers.forEach(clearTimeout);
+        lightTimers = [];
+      }
+
+      function clearLights() {
+        pods.forEach(p => p.classList.remove('on', 'go'));
+      }
+
+      function idleUI() {
+        clearTimers();
+        clearLights();
+        state = 'idle';
+
+        setMessage(
+          'READY TO TAKE THE GRID?',
+          'Press start, wait for lights out, then react.'
+        );
+
+        timer.innerHTML = '—.———<small>MS</small>';
+        startBtn.disabled = false;
+        startBtn.innerHTML = 'Start sequence <span class="keycap">↵</span>';
+      }
+
+      function begin() {
+        if (state === 'countdown' || state === 'waiting') return;
+
+        clearTimers();
+        clearLights();
+        state = 'countdown';
+
+        timer.innerHTML = '—.———<small>MS</small>';
+
+        setMessage(
+          'GET READY…',
+          'The lights will come on one by one.'
+        );
+
+        startBtn.disabled = true;
+        startBtn.textContent = 'On the grid…';
+
+        roundLabel.textContent =
+          `ATTEMPT ${String(attempt).padStart(2, '0')}`;
+
+        for (let i = 0; i < 5; i++) {
+          lightTimers.push(setTimeout(() => {
+            if (state === 'countdown') {
+              pods[i].classList.add('on');
+            }
+          }, 450 + i * 650));
+        }
+
+        // Random delay after the fifth light.
+        const delay = 450 + 4 * 650 + 900 + Math.random() * 1900;
+
+        goTimeout = setTimeout(() => {
+          if (state !== 'countdown') return;
+
+          clearLights();
+          pods.forEach(p => p.classList.add('go'));
+
+          state = 'waiting';
+          startAt = performance.now();
+
+          setMessage('LIGHTS OUT — GO!', 'Press SPACE now!');
+
+          const game = document.querySelector('.game');
+          game.classList.remove('flash');
+          void game.offsetWidth;
+          game.classList.add('flash');
+        }, delay);
+      }
+
+      function falseStart() {
+        clearTimers();
+        state = 'result';
+        clearLights();
+
+        setMessage(
+          'FALSE START!',
+          'You pressed before the lights went out. Try again.'
+        );
+
+        timer.innerHTML = 'JUMP START<small> —</small>';
+
+        pods.forEach(p => p.classList.add('on'));
+
+        startBtn.disabled = false;
+        startBtn.textContent = 'Try again';
+
+        attempt++;
+      }
+
+      function finish() {
+        if (state === 'waiting') {
+          const elapsed = performance.now() - startAt;
+          const result = Math.max(0, elapsed);
+
+          state = 'result';
+          clearLights();
+
+          timer.innerHTML = showTime(result);
+
+          setMessage(
+            result < 200
+              ? 'LIGHTNING FAST!'
+              : result < 260
+                ? 'GREAT REACTION!'
+                : 'LAP COMPLETE',
+            'That is your reaction time for this run.'
+          );
+
+          results.unshift(result);
+          results = results.slice(0, 8);
+
+          renderStats();
+
+          startBtn.disabled = false;
+          startBtn.innerHTML = 'Race again <span class="keycap">↵</span>';
+
+          attempt++;
+
+        } else if (state === 'countdown') {
+          falseStart();
+
+        } else if (state === 'idle' || state === 'result') {
+          begin();
+        }
+      }
+
+      function renderStats() {
+        const best = Math.min(...results);
+
+        bestValue.innerHTML = `${best.toFixed(3)} <span>ms</span>`;
+
+        bestSub.textContent = results.length === 1
+          ? 'Your first benchmark is in.'
+          : `Best across ${results.length} recent attempts.`;
+
+        countLabel.textContent =
+          `${results.length} RUN${results.length === 1 ? '' : 'S'}`;
+
+        historyEl.innerHTML = '';
+
+        results.slice(0, 5).forEach((r, i) => {
+          const row = document.createElement('div');
+          row.className = 'history-row';
+
+          const rank = document.createElement('span');
+          rank.textContent =
+            `#${String(i + 1).padStart(2, '0')}${i === 0 ? ' · LAST RUN' : ''}`;
+
+          const value = document.createElement('strong');
+          value.textContent = `${r.toFixed(3)} ms`;
+
+          row.append(rank, value);
+          historyEl.appendChild(row);
+        });
+      }
+
+      startBtn.addEventListener('click', () => {
+        if (state === 'idle' || state === 'result') {
+          begin();
+        }
+      });
+
+      resetBtn.addEventListener('click', () => {
+        attempt = 1;
+        results = [];
+
+        idleUI();
+
+        bestValue.innerHTML = '— <span>ms</span>';
+        bestSub.textContent = 'Complete a run to set your benchmark.';
+        countLabel.textContent = '0 RUNS';
+
+        historyEl.innerHTML =
+          '<div class="empty">Your laps will appear here.</div>';
+
+        roundLabel.textContent = 'ATTEMPT 01';
+      });
+
+      document.addEventListener('keydown', e => {
+        if (e.code === 'Space') {
+          e.preventDefault();
+
+          if (!e.repeat) {
+            finish();
+          }
+        }
+
+        if (e.code === 'Enter' && (state === 'idle' || state === 'result')) {
+          e.preventDefault();
+          begin();
+        }
+      });
+
+      idleUI();
+    })();
+  </script>
+</body>
+
+</html>
